@@ -1,0 +1,58 @@
+version: '3'
+services:
+  web:
+    build:
+      context: ./
+      dockerfile: web.docker
+    image: solid-web:latest
+    container_name: solid-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    expose:
+      - "80"
+      - "443"
+    volumes:
+      - ./:/code
+      - ./site.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - solid
+    depends_on:
+      - php
+
+  php:
+    build:
+      context: ./
+      dockerfile: php.docker
+    image: solid-php:latest
+    container_name: solid-php
+    volumes:
+      - ./:/code
+    networks:
+      - solid
+    depends_on:
+      - mysql
+
+  mysql:
+    build:
+      context: ./
+      dockerfile: mysql.docker
+    image: solid-mysql:latest
+    container_name: solid-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 'H*pi80T5'
+      MYSQL_DATABASE: 'solid'
+      MYSQL_USER: 'solid'
+      MYSQL_PASSWORD: 'G@ko79tY6'
+    expose:
+      - "3306"
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/init/:/docker-entrypoint-initdb.d
+      - /var/lib/manager/:/var/lib/mysql
+    networks:
+      - solid
+
+networks:
+  solid:
